@@ -59,6 +59,10 @@ const App = () => {
         </div>
       </div>
 
+      {/* testd */}
+      <div className="testdiv">
+        ignore this line
+      </div>
       <div className="ChatSection">
         <Chat 
             activeChannel={activeChannel}
