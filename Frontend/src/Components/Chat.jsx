@@ -2,49 +2,17 @@
 import { useState } from 'react';
 import './Chat.css';
 
-const Chat = ({ activeChannel }) => {
+const Chat = ({ activeChannel, messages, currentUser, onSendMessage }) => {
+    // We still keep textInput state here because it's temporary (while typing)
     const [textInput, setTextInput] = useState('');
 
-    // 1. Create a "Database" in state so we can remember messages for every room
-    // Keys match the room names from ChatRoom.jsx
-    const [chatData, setChatData] = useState({
-        "Main Chat": [
-            { id: 1, sender: 'them', text: 'Welcome to the main server!' },
-            { id: 2, sender: 'you', text: 'Thanks!' }
-        ],
-        "Greg": [
-            { id: 1, sender: 'them', text: 'Yo did you see the game?' },
-        ],
-        "Basketball": [
-            { id: 1, sender: 'them', text: 'Lakers are losing again...' },
-        ],
-        "Memes": [
-            { id: 1, sender: 'them', text: 'Check this out lol' },
-        ]
-    });
-
-    // 2. Helper to get messages for the CURRENT room
-    // If the room is empty/undefined, return an empty array []
-    const currentMessages = chatData[activeChannel] || [];
-
-    const handleSend = (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
         if (!textInput.trim()) return;
 
-        // Create the new message object
-        const newMessage = {
-            id: Date.now(),
-            sender: 'you',
-            text: textInput
-        };
-
-        // Update the "Database" state
-        // We copy the old data, find the specific room, and add the new message to it
-        setChatData(prevData => ({
-            ...prevData, // Keep other rooms the same
-            [activeChannel]: [...(prevData[activeChannel] || []), newMessage] // Update ONLY current room
-        }));
-
+        // Call the function passed down from App.jsx
+        onSendMessage(textInput);
+        
         setTextInput('');
     };
 
@@ -52,21 +20,29 @@ const Chat = ({ activeChannel }) => {
         <div className="Chat-Container">
             <div className="Chat-Header">
                 <h2># {activeChannel}</h2>
+                <p style={{color: 'gray', fontSize: '0.8rem'}}>Talking as {currentUser}</p>
             </div>
 
             <div className="Messages-List">
-                {/* 3. Map through the CURRENT messages only */}
-                {currentMessages.map((msg) => (
-                    <div 
-                        key={msg.id} 
-                        className={msg.sender === 'you' ? 'MessageBubbleYou' : 'MessageBubbleThem'}
-                    >
-                        <p>{msg.text}</p>
-                    </div>
-                ))}
+                {messages.length === 0 ? (
+                    <p style={{color: 'gray', textAlign: 'center', marginTop: '20px'}}>No messages yet.</p>
+                ) : (
+                    messages.map((msg) => (
+                        <div 
+                            key={msg.id} 
+                            // Check if the message sender matches the currently logged-in user
+                            className={msg.sender === currentUser ? 'MessageBubbleYou' : 'MessageBubbleThem'}
+                        >
+                            <p>{msg.text}</p>
+                            <span style={{fontSize: '0.6rem', opacity: 0.7, display: 'block', marginTop: '5px'}}>
+                                {msg.sender}
+                            </span>
+                        </div>
+                    ))
+                )}
             </div>
 
-            <form className="Text-Bar" onSubmit={handleSend}>
+            <form className="Text-Bar" onSubmit={handleSubmit}>
                 <input 
                     type="text" 
                     placeholder={`Message #${activeChannel}`} 
