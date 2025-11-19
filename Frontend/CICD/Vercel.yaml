@@ -1,3 +1,5 @@
+# .github/workflows/vercel.yaml
+
 name: Vercel Deployment
 on: [push]
 
@@ -6,15 +8,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        # This fixes "vite: command not found" by installing your project packages
+        run: npm install
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
       - name: Deploy to Vercel
-        # This pulls the token named "discord" from your GitHub Secrets
         env:
-          VERCEL_TOKEN: ${{ secrets.discord }}
+          # Matches the name you set in GitHub Secrets
+          VERCEL_TOKEN: ${{ secrets.NEWDISCORDTOKEN }}
         # --prod: Deploys to production
-        # --yes: Skips the "Are you sure?" confirmation prompts
+        # --yes: Skips confirmation
         run: vercel --prod --token=$VERCEL_TOKEN --yes
